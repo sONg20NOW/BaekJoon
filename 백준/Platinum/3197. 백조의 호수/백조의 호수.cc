@@ -31,14 +31,6 @@ void Melt(int R, int C) {
             Q.push({dx,dy});
         }
     }
-
-    // cout << "when melt?" << '\n';
-    // for (int i = 0; i < R; i++) {
-    //     for (int j = 0; j < C; j++) {
-    //         cout << when_melt[i][j] << ' ';
-    //     }
-    //     cout << '\n';
-    // }
 }
 
 int main() {
@@ -55,7 +47,6 @@ int main() {
             for (int j = 0; j < C; j++) {
                 if (board[i][j] == 'L') {
                     Q.push({i,j});
-                    // cout << "pushed(init): " << i << ',' << j << '\n';
 
                     vis[i][j] = 1;
                     once = false;
@@ -69,7 +60,6 @@ int main() {
 
     int day = 0;
     while (true) {
-        // 녹은 애들 큐에 넣기
         if (day > 0) {
             while(!ICED[day].empty()) {
                 pair<int,int> cur = ICED[day].front();  ICED[day].pop();
@@ -78,7 +68,6 @@ int main() {
         }
         while(!Q.empty()) {
             pair<int,int> cur = Q.front();  Q.pop();
-            // cout << "day: " << day << " / cur: " << cur.first << ',' << cur.second << '\n';
             if (board[cur.first][cur.second] == 'L') {
                 if (!once)  once = true;
                 else {
@@ -97,7 +86,6 @@ int main() {
                     continue;
                 } 
                 Q.push({dx,dy});
-                // cout << "pushed: " << dx << ',' << dy << '\n';
                 vis[dx][dy] = 1;
                 
             }
