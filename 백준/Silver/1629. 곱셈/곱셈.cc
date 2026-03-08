@@ -8,11 +8,13 @@ ll MOD(ll A, ll B, ll C) {
         return A % C;
     }
     ll k = B / 2;
+    ll value = MOD(A, k, C);
+    value = value * value % C;
 
     if (B % 2 == 1) {
-        return MOD(A, k, C) * MOD(A, k+1, C) % C;
+        return value * A % C;
     } else {
-        return MOD(A, k, C) * MOD(A, k, C) % C;
+        return value;
     }
 }
 
