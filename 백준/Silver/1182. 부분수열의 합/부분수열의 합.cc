@@ -3,32 +3,17 @@ using namespace std;
 
 int N, S;
 int nums[20];
-vector<int> arr;
-int isused[20];
-int num_cnt;
 
 int cnt;
 
-void func(int sum, int st) {
-    // cout << "-- S :" << sum << '\n';
-    // for (int i : arr) {
-    //     cout << i << ' ';
-    // }
-    // cout << '\n';
-    if (sum == S && arr.size() > 0) {
-        cnt++;
+void func(int idx, int tot) {
+    if (idx == N) {
+        if (tot == S)   cnt++;
+        return;
     }
 
-    for (int i = st; i < N; i++) {
-        if (!isused[i]) {
-            isused[i] = 1;
-            arr.push_back(nums[i]);
-            func(sum + nums[i], i + 1);
-
-            isused[i] = 0;
-            arr.pop_back();
-        }
-    }
+    func(idx + 1, tot);
+    func(idx + 1, tot + nums[idx]);
 }
 
 int main() {
@@ -37,9 +22,8 @@ int main() {
         cin >> nums[i];
     }
 
-    sort(nums, nums + N);
-
     func(0, 0);
 
+    if (S == 0) cnt--;
     cout << cnt;
 }
