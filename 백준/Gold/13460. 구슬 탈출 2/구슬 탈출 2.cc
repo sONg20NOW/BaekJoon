@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-const int MX = 13;
+const int MX = 11;
 int N, M;
 char board[MX][MX];
 char board2[MX][MX];
