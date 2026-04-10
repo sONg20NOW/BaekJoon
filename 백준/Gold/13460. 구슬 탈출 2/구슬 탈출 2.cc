@@ -95,14 +95,15 @@ int main() {
 
     while(!Q.empty()) {
         State cur_state = Q.front();    Q.pop();
-        if (cur_state.count > 10)   break;
-        if (cur_state.bx == hx && cur_state.by == hy)   continue;
-        if (cur_state.rx == hx && cur_state.ry == hy) {
-            cout << cur_state.count << '\n';
-            return 0;
-        }
+
         for (int dir : {0, 1, 2, 3}) {
             State next = tilt(cur_state, dir);
+            if (next.count > 10)    continue;
+            if (next.bx == hx && next.by == hy)   continue;
+            if (next.rx == hx && next.ry == hy) {
+                cout << next.count << '\n';
+                return 0;
+            }
             if (visited[next.rx][next.ry][next.bx][next.by])    continue;
             Q.push(next);
             visited[next.rx][next.ry][next.bx][next.by] = 1;
