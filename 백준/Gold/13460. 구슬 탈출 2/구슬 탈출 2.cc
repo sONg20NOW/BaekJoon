@@ -1,154 +1,77 @@
+// 제미나이가 말한대로 풀어보기.
+// 보드는 그대로, 구슬 위치만 바꾸면 된다.
+
 #include <bits/stdc++.h>
 using namespace std;
-const int MX = 11;
+
 int N, M;
+const int MX = 11;
 char board[MX][MX];
-char board2[MX][MX];
+struct State {
+    int rx, ry, bx, by, count;
+};
+// 초기 공 위치
+int rx, ry, bx, by;
+// 구멍 위치
+int hx, hy;
+
+queue<State> Q;
 int visited[MX][MX][MX][MX];
 
-int rx, ry, bx, by;
+pair<int,int> d[4] = {{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
 
-queue<vector<int>> Q;
-void printBoard() {
-    cout << "-----" << '\n';
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
-            cout << board[i][j];
-        }
-        cout << '\n';
+// 해당 공 위치에서 dir 방향으로 공을 굴려서 공 위치를 업데이트하는 함수
+State tilt(State prev, int dir) {
+    State next = prev;
+
+    pair<int,int> flow = d[dir];
+    while(board[next.rx + flow.first][next.ry + flow.second] != '#' && board[next.rx][next.ry] != 'O') {
+        next.rx += flow.first;
+        next.ry += flow.second;
     }
-}
-
-// dir 방향으로 기울이기. 파란 공이 들어가면 -1 반환. 빨간 공은 1. 둘 중 무엇도 아니면 0.
-int tilt(char board2[MX][MX], int dir) {
-    stack<char> balls;
-    switch (dir)
-    {
-    case 0:
-    // 왼쪽으로
-        for (int i = 0; i < N; i++) {
-            for (int j = M - 1; j >= 0; j--) {
-                if (board2[i][j] == 'R' || board2[i][j] == 'B') {
-                    balls.push(board2[i][j]);
-                    board2[i][j] = '.';
-                }
-                else if (board2[i][j] == '#' && !balls.empty()) {
-                    int diff = 0;
-                    while (!balls.empty()) {
-                        board2[i][j + ++diff] = balls.top();
-                        balls.pop();
-                    }
-                } else if (board2[i][j] == 'O' && !balls.empty()) {
-                    bool redIn = false, blueIn = false;
-                    while(!balls.empty()) {
-                        char b = balls.top();   balls.pop();
-                        if (b == 'R')   redIn = true;
-                        else if (b == 'B')  blueIn = true;
-                    }
-                    if (blueIn) return -1;
-                    if (redIn) return 1;
-                }
-            }
-        }
-        break;
-    case 1:
-    // 오른쪽으로
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                if (board2[i][j] == 'R' || board2[i][j] == 'B') {
-                    balls.push(board2[i][j]);
-                    board2[i][j] = '.';
-                }
-                else if (board2[i][j] == '#' && !balls.empty()) {
-                    int diff = 0;
-                    while (!balls.empty()) {
-                        board2[i][j - ++diff] = balls.top();
-                        balls.pop();
-                    }
-                } else if (board2[i][j] == 'O' && !balls.empty()) {
-                    bool redIn = false, blueIn = false;
-                    while(!balls.empty()) {
-                        char b = balls.top();   balls.pop();
-                        if (b == 'R')   redIn = true;
-                        else if (b == 'B')  blueIn = true;
-                    }
-                    if (blueIn) return -1;
-                    if (redIn) return 1;
-                }
-            }
-        }
-        break; 
-    case 2:
-    // 아래로
-        for (int i = 0; i < M; i++) {
-            for (int j = 0; j < N; j++) {
-                if (board2[j][i] == 'R' || board2[j][i] == 'B') {
-                    balls.push(board2[j][i]);
-                    board2[j][i] = '.';
-                }
-                else if (board2[j][i] == '#' && !balls.empty()) {
-                    int diff = 0;
-                    while (!balls.empty()) {
-                        board2[j - ++diff][i] = balls.top();
-                        balls.pop();
-                    }
-                } else if (board2[j][i] == 'O' && !balls.empty()) {
-                    bool redIn = false, blueIn = false;
-                    while(!balls.empty()) {
-                        char b = balls.top();   balls.pop();
-                        if (b == 'R')   redIn = true;
-                        else if (b == 'B')  blueIn = true;
-                    }
-                    if (blueIn) return -1;
-                    if (redIn) return 1;
-                }
-            }
-        }
-        break; 
-    case 3:
-        for (int i = 0; i < M; i++) {
-            for (int j = N - 1; j >= 0; j--) {
-                if (board2[j][i] == 'R' || board2[j][i] == 'B') {
-                    balls.push(board2[j][i]);
-                    board2[j][i] = '.';
-                }
-                else if (board2[j][i] == '#' && !balls.empty()) {
-                    int diff = 0;
-                    while (!balls.empty()) {
-                        board2[j + ++diff][i] = balls.top();
-                        balls.pop();
-                    }
-                } else if (board2[j][i] == 'O' && !balls.empty()) {
-                    bool redIn = false, blueIn = false;
-                    while(!balls.empty()) {
-                        char b = balls.top();   balls.pop();
-                        if (b == 'R')   redIn = true;
-                        else if (b == 'B')  blueIn = true;
-                    }
-                    if (blueIn) return -1;
-                    if (redIn) return 1;
-                }
-            }
-        }
-        break; 
-    default:
-        break;
+    while(board[next.bx + flow.first][next.by + flow.second] != '#' && board[next.bx][next.by] != 'O') {
+        next.bx += flow.first;
+        next.by += flow.second;
     }
-    
-    return 0;
-}
-
-// board2에서 볼 위치 찾기
-void findBalls() {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
-            if (board2[i][j] == 'R') {
-                rx = i; ry = j;
-            } else if (board2[i][j] == 'B') {
-                bx = i; by = j;
+    // 공이 구멍이 아닌 같은 위치에서 멈췄다면
+    if (next.rx == next.bx && next.by == next.ry && !(next.rx == hx  && next.ry == hy)) {
+        switch (dir)
+        {
+        case 0:
+            if (prev.ry < prev.by) {
+                next.by++;
+            } else {
+                next.ry++;
             }
+            break;
+        case 1:
+             if (prev.ry < prev.by) {
+                next.ry--;
+            } else {
+                next.by--;
+            }
+            break;
+        case 2:
+            if (prev.rx < prev.bx) {
+                next.rx--;
+            } else {
+                next.bx--;
+            }            
+            break;
+        case 3:
+            if (prev.rx < prev.bx) {
+                next.bx++;
+            } else {
+                next.rx++;
+            }       
+            break;
+        default:
+            break;
         }
     }
+
+    next.count++;
+    return next;
 }
 
 int main() {
@@ -156,61 +79,36 @@ int main() {
     cin >> N >> M;
     for (int i = 0; i < N; i++) {
         cin >> board[i];
-    }
-
-    for (int i = 0; i < N; i++) 
-        for (int j = 0; j < M; j++)
-            board2[i][j] = board[i][j];
-    findBalls();
-    visited[rx][ry][bx][by] = 1;
-
-    Q.push({0});
-    Q.push({1});
-    Q.push({2});
-    Q.push({3});
-
-    while(!Q.empty()) {
-        vector<int> cur = Q.front();    Q.pop();
-        if (cur.size() > 10) {
-            cout << -1 << '\n';
-            return 0;
-        }
-        // board2 초기화
-        for (int i = 0; i < N; i++) 
-            for (int j = 0; j < M; j++)
-                board2[i][j] = board[i][j];
-
-        // 기울이기 진행
-        for (int i = 0; i < cur.size(); i++) {
-            int res = tilt(board2, cur[i]);
-            findBalls();
-            if (i == cur.size() - 1) {
-                if (res == 1) {
-                    cout << cur.size() << '\n';
-                    return 0;
-                } else if (res == 0 && !visited[rx][ry][bx][by]) {
-                    visited[rx][ry][bx][by] = 1;
-
-                    vector<int> temp = cur;
-                    temp.push_back(0);
-                    Q.push(temp);
-                    temp.pop_back();
-
-                    temp.push_back(1);
-                    Q.push(temp);
-                    temp.pop_back();
-
-                    temp.push_back(2);
-                    Q.push(temp);
-                    temp.pop_back();
-
-                    temp.push_back(3);
-                    Q.push(temp);
-                    temp.pop_back();
-                } 
+        for (int j = 0; j < M; j++) {
+            if (board[i][j] == 'R') {
+                rx = i; ry = j;
+            } else if (board[i][j] == 'B') {
+                bx = i; by = j;
+            } else if (board[i][j] == 'O') {
+                hx = i; hy = j;
             }
         }
     }
+    
+    Q.push({rx, ry, bx, by, 0});
+    visited[rx][ry][bx][by] = 1;
+
+    while(!Q.empty()) {
+        State cur_state = Q.front();    Q.pop();
+        if (cur_state.count > 10)   break;
+        if (cur_state.bx == hx && cur_state.by == hy)   continue;
+        if (cur_state.rx == hx && cur_state.ry == hy) {
+            cout << cur_state.count << '\n';
+            return 0;
+        }
+        for (int dir : {0, 1, 2, 3}) {
+            State next = tilt(cur_state, dir);
+            if (visited[next.rx][next.ry][next.bx][next.by])    continue;
+            Q.push(next);
+            visited[next.rx][next.ry][next.bx][next.by] = 1;
+        }
+    }
+
     cout << -1 << '\n';
     return 0;
 }
