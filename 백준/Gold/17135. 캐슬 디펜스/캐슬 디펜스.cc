@@ -47,7 +47,7 @@ void BFS(int i) {
             if (candidates.empty()) min_dist = visited[cur.first][cur.second];
             
             if (min_dist == visited[cur.first][cur.second]) candidates.push_back(cur);
-            else    continue;
+            else    return;
         }
         for (pair<int,int> d: dir) {
             int dx = d.first + cur.first;
